@@ -1,0 +1,116 @@
+/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+    padding: 20px  20px 20px 20px!important;
+    flex-direction: column;
+}
+
+.container {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 700px;
+    max-width: 100%;
+    min-width: 700px;
+    margin:auto;
+    box-sizing: border-box; /* Make sure padding doesn't cause overflow */
+
+}
+
+h2 {
+    color: #2c3e50;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input, select {
+    width: 100%;
+    all: unset;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+button {
+    margin: 10px 5px;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.add-btn {
+    background: #27ae60;
+    color: white;
+}
+
+.add-btn:hover {
+    background: #219150;
+}
+
+.delete-btn {
+    background: #e74c3c;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #c0392b;
+}
+
+#historyList {
+    text-align: left;
+    max-height: 250px;
+    overflow-y: auto;
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+.history-item {
+    font-size: 16px;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.income {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.expense {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.edit-btn {
+    margin-left: 5px;
+    color: blue;
+    cursor: pointer;
+}
+
+.delete-btn-small {
+    margin-left: 5px;
+    color: red;
+    cursor: pointer;
+}
