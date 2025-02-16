@@ -75,7 +75,6 @@ button {
 
 #historyList {
     text-align: left;
-    max-height: 250px;
     overflow-y: auto;
     border-top: 1px solid #ccc;
     padding-top: 10px;
