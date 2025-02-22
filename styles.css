@@ -8,7 +8,7 @@ body {
     align-items: center;
     height: 100vh;
     background-color: #f4f4f4;
-    padding: 20px  20px 20px 20px!important;
+    padding: 20px 20px 20px 20px !important;
     flex-direction: column;
 }
 
@@ -21,8 +21,9 @@ body {
     width: 700px;
     max-width: 100%;
     min-width: 700px;
-    margin:auto;
-    box-sizing: border-box; /* Make sure padding doesn't cause overflow */
+    margin: auto;
+    box-sizing: border-box;
+    /* Make sure padding doesn't cause overflow */
 
 }
 
@@ -36,7 +37,8 @@ h2 {
     gap: 10px;
 }
 
-input, select {
+input,
+select {
     width: 100%;
     all: unset;
     padding: 10px;
@@ -90,12 +92,25 @@ button {
     justify-content: space-between;
     align-items: center;
     transition: all 0.3s ease;
+    justify-content: flex-start;
+    display: flex;
+
+}
+.history-item span {
+    flex: 1;
+    width: 15% !important;
+    /* border: 1px solid #ccc; */
+    text-align: left; 
 }
 
-.income {
+.history-item span:first-child {
+    width: 200px !important;
+    flex: 0 0 200px; 
+}.income {
     background-color: #d4edda;
     color: #155724;
 }
+
 
 .expense {
     background-color: #f8d7da;
