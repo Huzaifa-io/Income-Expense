@@ -34,18 +34,17 @@
             <!-- Date Filter -->
             <div class="filter-section">
                 <label>Start Date:</label>
-                <input type="date" id="startDate">
+                <input onchange="loadTransactions()" type="date" id="startDate">
                 <label>End Date:</label>
-                <input type="date" id="endDate">
-                <button onclick="loadTransactions()">Filter</button>
+                <input onchange="loadTransactions()" type="date" id="endDate">
             </div>
 
             <div id="historyList"></div>
         </div>
 
         <div class="download-section">
-            <button onclick="downloadImage()">Download as Image</button>
-            <button onclick="downloadPDF()">Download as PDF</button>
+            <button class="download" onclick="downloadImage()">Download as Image</button>
+            <button class="download" onclick="downloadPDF()">Download as PDF</button>
         </div>
     </div>
 

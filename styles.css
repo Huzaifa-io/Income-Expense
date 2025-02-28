@@ -22,7 +22,14 @@ body {
     box-sizing: border-box;
 
 }
-
+.download{
+    background-color: #000000;
+    color: rgb(255, 255, 255);
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    
+}
 h2 {
     color: #2c3e50;
 }
