@@ -34,10 +34,14 @@
 
             <!-- Date Filter -->
             <div class="filter-section">
-                <label>Start Date:</label>
-                <input onchange="loadTransactions()" type="date" id="startDate">
-                <label>End Date:</label>
-                <input onchange="loadTransactions()" type="date" id="endDate">
+                <div>
+                    <label>Start Date:</label>
+                    <input  placeholder="Start date" onchange="loadTransactions()" type="date" id="startDate">
+                </div>
+                <div>    
+                    <label>End Date:</label>
+                    <input placeholder="End Date" onchange="loadTransactions()" type="date" id="endDate">
+                </div>
             </div>
 
             <div id="historyList"></div>
