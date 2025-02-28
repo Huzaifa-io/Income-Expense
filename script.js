@@ -19,7 +19,7 @@ function addTransaction() {
         amount: amount,
         description: description,
         type: transactionType,
-        date: new Date().toLocaleString()
+        date: new Date().toISOString()
     });
 
     localStorage.setItem("transactions", JSON.stringify(transactions));
@@ -34,16 +34,26 @@ function loadTransactions() {
     let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
     let balance = 0;
 
+    let startDate = document.getElementById("startDate").value;
+    let endDate = document.getElementById("endDate").value;
+
     historyList.innerHTML = "";
     transactions.forEach((transaction) => {
+        let transactionDate = new Date(transaction.date);
+
+        if ((startDate && transactionDate < new Date(startDate)) ||
+            (endDate && transactionDate > new Date(endDate))) {
+            return;
+        }
+
         balance += transaction.amount;
 
         let div = document.createElement("div");
         div.classList.add("history-item", transaction.type);
         div.innerHTML = `
-           <span> ${transaction.date}</span>
-           <span> <strong>${transaction.description}</strong></span>
-          <span>  ${Math.abs(transaction.amount)} </span>
+            <span>${new Date(transaction.date).toLocaleString()}</span>
+            <span><strong>${transaction.description}</strong></span>
+            <span>${Math.abs(transaction.amount)}</span>
             <span class="edit-btn" onclick="editTransaction(${transaction.id})">Edit</span>
             <span class="delete-btn-small" onclick="deleteTransaction(${transaction.id})">Delete</span>
         `;
@@ -116,5 +126,28 @@ function deleteAll() {
 
             Swal.fire("Deleted!", "All transactions have been removed.", "success");
         }
+    });
+}
+
+function downloadImage() {
+    html2canvas(document.getElementById("exportSection"), { scale: 2 }).then(canvas => {
+        let link = document.createElement("a");
+        link.href = canvas.toDataURL();
+        link.download = "TransactionHistory.png";
+        link.click();
+    });
+}
+
+function downloadPDF() {
+    html2canvas(document.getElementById("exportSection"), { scale: 2 }).then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const { jsPDF } = window.jspdf;
+        let doc = new jsPDF("p", "mm", "a4");
+
+        const imgWidth = 210;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        doc.addImage(imgData, "PNG", 0, 10, imgWidth, imgHeight);
+        doc.save("TransactionHistory.pdf");
     });
 }
