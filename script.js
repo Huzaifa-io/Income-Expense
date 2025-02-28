@@ -150,31 +150,3 @@ function downloadPDF() {
         doc.save("TransactionHistory.pdf");
     });
 }
-function showTransactionsInDiv() {
-    let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-    let displayDiv = document.getElementById("transactionsDisplay");
-
-    if (transactions.length === 0) {
-        displayDiv.innerHTML = "<p>No transactions found.</p>";
-        return;
-    }
-
-    let html = "<ul>";
-    transactions.forEach(t => {
-        html += `
-            <li>
-                <strong>Date:</strong> ${new Date(t.date).toLocaleString()} <br>
-                <strong>Description:</strong> ${t.description} <br>
-                <strong>Amount:</strong> ${t.amount} <br>
-                <strong>Type:</strong> ${t.type}
-                <hr>
-            </li>
-        `;
-    });
-    html += "</ul>";
-
-    displayDiv.innerHTML = html;
-}
-
-// Call this function to display transactions
-showTransactionsInDiv();
