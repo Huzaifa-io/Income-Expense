@@ -1,6 +1,17 @@
 import { db } from "./firebase-config.js";
 import { collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
+window.onload = function () {
+    let name = localStorage.getItem("name");
+    if (!name) {
+        name = prompt("Enter your name:");
+        if (name) {
+            localStorage.setItem("name", name);
+        }
+    }
+};
+let name = localStorage.getItem("name");
+
 async function addTransaction() {
     let amount = document.getElementById("amount").value.trim();
     let description = document.getElementById("description").value.trim();
@@ -14,7 +25,7 @@ async function addTransaction() {
     amount = parseFloat(amount);
     if (transactionType === "expense") amount = -amount;
 
-    await addDoc(collection(db, "transactions"), {
+    await addDoc(collection(db, name), {
         amount: amount,
         description: description,
         type: transactionType,
@@ -40,7 +51,7 @@ async function loadTransactions() {
     let startTimestamp = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
     let endTimestamp = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null;
 
-    const querySnapshot = await getDocs(collection(db, "transactions"));
+    const querySnapshot = await getDocs(collection(db, name));
 
     querySnapshot.forEach(docSnap => {
         let transaction = docSnap.data();
@@ -100,7 +111,7 @@ async function editTransaction(id, oldDescription, oldAmount) {
         return;
     }
 
-    await updateDoc(doc(db, "transactions", id), {
+    await updateDoc(doc(db, name, id), {
         description: newDescription,
         amount: oldAmount < 0 ? -newAmount : newAmount
     });
@@ -109,14 +120,14 @@ async function editTransaction(id, oldDescription, oldAmount) {
 }
 
 async function deleteTransaction(id) {
-    await deleteDoc(doc(db, "transactions", id));
+    await deleteDoc(doc(db, name, id));
     loadTransactions();
 }
 
 async function deleteAll() {
-    const querySnapshot = await getDocs(collection(db, "transactions"));
+    const querySnapshot = await getDocs(collection(db, name));
     querySnapshot.forEach(async (transaction) => {
-        await deleteDoc(doc(db, "transactions", transaction.id));
+        await deleteDoc(doc(db, name, transaction.id));
     });
     loadTransactions();
 }
@@ -135,7 +146,7 @@ async function downloadPDF() {
 
     let y = 40;
     let balance = 0;
-    const querySnapshot = await getDocs(collection(db, "transactions"));
+    const querySnapshot = await getDocs(collection(db, name));
 
     // Table Header
     doc.setFont("helvetica", "bold");
