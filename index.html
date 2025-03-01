@@ -24,15 +24,13 @@
         </div>
 
         <button class="add-btn" onclick="addTransaction()">Add</button>
-        <button class="delete-btn" onclick="deleteAll()">Delete All</button>
+        <button class="delete-btn-all" onclick="deleteAll()">Delete All</button>
 
-        <!-- Wrapping Balance & Transactions inside exportSection -->
         <div id="exportSection">
             <h3>Balance: <span id="totalBalance">0</span></h3>
 
             <h3>Transaction History</h3>
 
-            <!-- Date Filter -->
             <div class="filter-section">
                 <div>
                     <label>Start Date:</label>
@@ -53,6 +51,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

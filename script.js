@@ -1,5 +1,7 @@
-document.addEventListener("DOMContentLoaded", loadTransactions);
-function addTransaction() {
+import { db } from "./firebase-config.js";
+import { collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+async function addTransaction() {
     let amount = document.getElementById("amount").value.trim();
     let description = document.getElementById("description").value.trim();
     let transactionType = document.getElementById("transactionType").value;
@@ -12,37 +14,42 @@ function addTransaction() {
     amount = parseFloat(amount);
     if (transactionType === "expense") amount = -amount;
 
-    let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-    transactions.push({
-        id: Date.now(),
+    await addDoc(collection(db, "transactions"), {
         amount: amount,
         description: description,
         type: transactionType,
         date: new Date().toISOString()
     });
 
-    localStorage.setItem("transactions", JSON.stringify(transactions));
     document.getElementById("amount").value = "";
     document.getElementById("description").value = "";
     loadTransactions();
 }
 
-function loadTransactions() {
+async function loadTransactions() {
     let historyList = document.getElementById("historyList");
     let totalBalance = document.getElementById("totalBalance");
-    let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
     let balance = 0;
+    historyList.innerHTML = "";
 
+    // Get filter values
     let startDate = document.getElementById("startDate").value;
     let endDate = document.getElementById("endDate").value;
 
-    historyList.innerHTML = "";
-    transactions.forEach((transaction) => {
-        let transactionDate = new Date(transaction.date);
+    // Convert to Date objects for comparison
+    let startTimestamp = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
+    let endTimestamp = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null;
 
-        if ((startDate && transactionDate < new Date(startDate)) ||
-            (endDate && transactionDate > new Date(endDate))) {
-            return;
+    const querySnapshot = await getDocs(collection(db, "transactions"));
+
+    querySnapshot.forEach(docSnap => {
+        let transaction = docSnap.data();
+        let transactionId = docSnap.id;
+        let transactionDate = new Date(transaction.date).getTime(); // Convert Firestore date to timestamp
+
+        // Apply date filter
+        if ((startTimestamp && transactionDate < startTimestamp) || (endTimestamp && transactionDate > endTimestamp)) {
+            return; // Skip transactions outside the date range
         }
 
         balance += transaction.amount;
@@ -53,8 +60,12 @@ function loadTransactions() {
             <span>${new Date(transaction.date).toLocaleString()}</span>
             <span><strong>${transaction.description}</strong></span>
             <span>${Math.abs(transaction.amount)}</span>
-            <span class="edit-btn" onclick="editTransaction(${transaction.id})">Edit</span>
-            <span class="delete-btn-small" onclick="deleteTransaction(${transaction.id})">Delete</span>
+            <span>
+                <button class="edit-btn" onclick="editTransaction('${transactionId}', '${transaction.description}', '${transaction.amount}')">Edit</button>
+            </span>
+            <span>
+                <button class="delete-btn" onclick="deleteTransaction('${transactionId}')">Delete</button>
+            </span>
         `;
         historyList.appendChild(div);
     });
@@ -62,91 +73,123 @@ function loadTransactions() {
     totalBalance.innerText = `${balance}`;
 }
 
-function editTransaction(id) {
-    let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-    let transaction = transactions.find(t => t.id === id);
 
-    Swal.fire({
+async function editTransaction(id, oldDescription, oldAmount) {
+    const { value: formValues } = await Swal.fire({
         title: "Edit Transaction",
         html: `
-            <input id="editAmount" type="number" value="${Math.abs(transaction.amount)}">
-            <input id="editDescription" type="text" value="${transaction.description}">
+            <input id="newDescription" class="swal2-input" placeholder="Description" value="${oldDescription}">
+            <input id="newAmount" class="swal2-input" type="number" placeholder="Amount" value="${Math.abs(oldAmount)}">
         `,
-        showCancelButton: true,
-        confirmButtonText: "Save",
-    }).then((result) => {
-        if (result.isConfirmed) {
-            let newAmount = parseFloat(document.getElementById("editAmount").value);
-            let newDescription = document.getElementById("editDescription").value.trim();
-
-            if (newAmount > 0 && newDescription !== "") {
-                transaction.amount = transaction.type === "expense" ? -newAmount : newAmount;
-                transaction.description = newDescription;
-
-                localStorage.setItem("transactions", JSON.stringify(transactions));
-                loadTransactions();
-                Swal.fire("Updated!", "Transaction has been updated.", "success");
-            }
+        focusConfirm: false,
+        preConfirm: () => {
+            return [
+                document.getElementById("newDescription").value,
+                document.getElementById("newAmount").value
+            ];
         }
     });
-}
 
-function deleteTransaction(id) {
-    Swal.fire({
-        title: "Are you sure?",
-        text: "This transaction will be deleted!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-        if (result.isConfirmed) {
-            let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-            transactions = transactions.filter(t => t.id !== id);
+    if (!formValues) return;
 
-            localStorage.setItem("transactions", JSON.stringify(transactions));
-            loadTransactions();
+    let newDescription = formValues[0].trim();
+    let newAmount = parseFloat(formValues[1]);
 
-            Swal.fire("Deleted!", "Transaction has been removed.", "success");
-        }
+    if (newDescription === "" || isNaN(newAmount)) {
+        Swal.fire("Error!", "Invalid input!", "error");
+        return;
+    }
+
+    await updateDoc(doc(db, "transactions", id), {
+        description: newDescription,
+        amount: oldAmount < 0 ? -newAmount : newAmount
     });
+
+    loadTransactions();
 }
 
-function deleteAll() {
-    Swal.fire({
-        title: "Delete All Transactions?",
-        text: "This will remove all records!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, delete everything!",
-    }).then((result) => {
-        if (result.isConfirmed) {
-            localStorage.removeItem("transactions");
-            loadTransactions();
+async function deleteTransaction(id) {
+    await deleteDoc(doc(db, "transactions", id));
+    loadTransactions();
+}
 
-            Swal.fire("Deleted!", "All transactions have been removed.", "success");
-        }
+async function deleteAll() {
+    const querySnapshot = await getDocs(collection(db, "transactions"));
+    querySnapshot.forEach(async (transaction) => {
+        await deleteDoc(doc(db, "transactions", transaction.id));
     });
+    loadTransactions();
 }
 
-function downloadImage() {
-    html2canvas(document.getElementById("exportSection"), { scale: 2 }).then(canvas => {
+async function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF();
+
+    // Title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Income & Expense Report", 60, 15);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 60, 22);
+
+    let y = 40;
+    let balance = 0;
+    const querySnapshot = await getDocs(collection(db, "transactions"));
+
+    // Table Header
+    doc.setFont("helvetica", "bold");
+    doc.setFillColor(200, 200, 200); // Gray background for header
+    doc.rect(10, y - 5, 190, 10, "F"); // Header background
+    doc.text("Date", 12, y);
+    doc.text("Description", 70, y);
+    doc.text("Type", 130, y);
+    doc.text("Amount", 160, y);
+
+    y += 10;
+    doc.setFont("helvetica", "normal");
+
+    // Table Content
+    querySnapshot.forEach((transactionSnap) => {
+        let transaction = transactionSnap.data();
+        let type = transaction.amount < 0 ? "Expense" : "Income"; // Determine type
+        let amount = Math.abs(transaction.amount); // Remove negative sign
+
+        balance += transaction.amount;
+
+        doc.text(new Date(transaction.date).toLocaleString(), 12, y);
+        doc.text(transaction.description, 70, y);
+        doc.text(type, 130, y); // Show "Income" or "Expense"
+        doc.text(`${amount}`, 160, y); // Show absolute amount
+
+        y += 8; // Row spacing
+    });
+
+    // Footer
+    doc.setFont("helvetica", "bold");
+    doc.text(`Total Balance: ${balance}`, 12, y + 10);
+
+    // Save the file
+    doc.save("Income_Expense_Report.pdf");
+}
+
+async function downloadImage() {
+    const element = document.getElementById("exportSection"); // The section to capture
+
+    html2canvas(element, { scale: 2 }).then(canvas => {
         let link = document.createElement("a");
-        link.href = canvas.toDataURL();
-        link.download = "TransactionHistory.png";
+        link.href = canvas.toDataURL("image/png");
+        link.download = "Income_Expense_Report.png";
         link.click();
     });
 }
 
-function downloadPDF() {
-    html2canvas(document.getElementById("exportSection"), { scale: 2 }).then((canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        const { jsPDF } = window.jspdf;
-        let doc = new jsPDF("p", "mm", "a4");
+window.downloadImage = downloadImage;
+window.addTransaction = addTransaction;
+window.loadTransactions = loadTransactions;
+window.editTransaction = editTransaction;
+window.deleteTransaction = deleteTransaction;
+window.deleteAll = deleteAll;
+window.downloadPDF = downloadPDF;
 
-        const imgWidth = 210;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        doc.addImage(imgData, "PNG", 0, 10, imgWidth, imgHeight);
-        doc.save("TransactionHistory.pdf");
-    });
-}
+document.addEventListener("DOMContentLoaded", loadTransactions);

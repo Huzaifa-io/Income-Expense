@@ -19,14 +19,16 @@ body {
     box-sizing: border-box;
 
 }
-.download{
+
+.download {
     background-color: #000000;
     color: rgb(255, 255, 255);
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
-    
+
 }
+
 h2 {
     color: #2c3e50;
 }
@@ -46,10 +48,12 @@ select {
     border-radius: 5px;
     font-size: 16px;
 }
-.filter-section{
+
+.filter-section {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
 }
+
 button {
     margin: 10px 5px;
     padding: 10px;
@@ -69,10 +73,6 @@ button {
     background: #219150;
 }
 
-.delete-btn {
-    background: #e74c3c;
-    color: white;
-}
 
 .delete-btn:hover {
     background: #c0392b;
@@ -99,16 +99,19 @@ button {
     display: flex;
 
 }
+
 .history-item span {
     flex: 1;
     width: 15% !important;
-    text-align: left; 
+    text-align: left;
 }
 
 .history-item span:first-child {
     width: 200px !important;
-    flex: 0 0 200px; 
-}.income {
+    flex: 0 0 200px;
+}
+
+.income {
     background-color: #d4edda;
     color: #155724;
 }
@@ -120,13 +123,19 @@ button {
 }
 
 .edit-btn {
-    margin-left: 5px;
-    color: blue;
-    cursor: pointer;
+    background: blue;
+    color: rgb(255, 255, 255);
+    width: 80px;
 }
 
-.delete-btn-small {
-    margin-left: 5px;
-    color: red;
+.delete-btn {
+    background: red;
+    color: white;
+    width: 80px;
+}
+
+.delete-btn-all {
+    color: rgb(255, 255, 255);
     cursor: pointer;
+    background-color: red;
 }
