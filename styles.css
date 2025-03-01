@@ -53,7 +53,9 @@ select {
     display: flex;
     justify-content: space-evenly;
 }
-
+.filter-section input{
+width: 200px;
+}
 button {
     margin: 10px 5px;
     padding: 10px;
