@@ -1,5 +1,5 @@
 import { db } from "./firebase-config.js";
-import { collection, addDoc, getDocs, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+import { collection, addDoc, getDocs, deleteDoc, query,orderBy,updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
 window.onload = function () {
     let name = localStorage.getItem("name");
@@ -37,6 +37,7 @@ async function addTransaction() {
     loadTransactions();
 }
 
+
 async function loadTransactions() {
     let historyList = document.getElementById("historyList");
     let totalBalance = document.getElementById("totalBalance");
@@ -51,7 +52,9 @@ async function loadTransactions() {
     let startTimestamp = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
     let endTimestamp = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null;
 
-    const querySnapshot = await getDocs(collection(db, name));
+    // Query Firestore with sorting by date
+    const transactionsQuery = query(collection(db, name), orderBy("date", "desc")); // Change to "asc" for ascending order
+    const querySnapshot = await getDocs(transactionsQuery);
 
     querySnapshot.forEach(docSnap => {
         let transaction = docSnap.data();
